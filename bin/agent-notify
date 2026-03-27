@@ -1,0 +1,136 @@
+#!/usr/bin/env sh
+#
+# bin/agent-notify
+#
+# Main entry point and dispatcher for agent-notify.
+# Accepts a normalized notification payload and routes it to one or more
+# notification backends.
+#
+# Usage:
+#   agent-notify --tool TOOL --event EVENT --message MSG [--title TITLE]
+#
+# Arguments:
+#   --tool    The originating tool (e.g. claude, codex)
+#   --event   The event type   (e.g. stop, notification, permission_request, complete)
+#   --message The human-readable notification body
+#   --title   Optional title (defaults to "TOOL: EVENT")
+#
+# Environment variables:
+#   AGENT_NOTIFY_BACKENDS   Comma-separated backend names to run (default: sound)
+#                           Example: sound,pushover
+#
+#   AGENT_NOTIFY_BACKENDS_DIR
+#                           Override the directory where backend scripts live.
+#                           Useful when agent-notify is installed outside the repo.
+#
+# Exit codes:
+#   0  All backends ran successfully (or there was nothing to run)
+#   1  One or more backends failed or were not found
+
+# Resolve the repo root from this script's location so relative paths work
+# regardless of the current working directory.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Allow override for non-standard install layouts
+BACKENDS_DIR="${AGENT_NOTIFY_BACKENDS_DIR:-$REPO_ROOT/backends}"
+
+# Load .env from repo root if it exists and has not been sourced already.
+# This lets users store secrets in .env without exporting them globally.
+if [ -f "$REPO_ROOT/.env" ] && [ -z "${AGENT_NOTIFY_ENV_LOADED:-}" ]; then
+  set -a
+  # shellcheck source=/dev/null
+  . "$REPO_ROOT/.env"
+  set +a
+  AGENT_NOTIFY_ENV_LOADED=1
+  export AGENT_NOTIFY_ENV_LOADED
+fi
+
+# ---------------------------------------------------------------------------
+# Argument parsing
+# ---------------------------------------------------------------------------
+tool=""
+event=""
+message=""
+title=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --tool)
+      tool="$2"
+      shift 2
+      ;;
+    --event)
+      event="$2"
+      shift 2
+      ;;
+    --message)
+      message="$2"
+      shift 2
+      ;;
+    --title)
+      title="$2"
+      shift 2
+      ;;
+    -h|--help)
+      printf 'Usage: agent-notify --tool TOOL --event EVENT --message MSG [--title TITLE]\n'
+      exit 0
+      ;;
+    *)
+      printf 'agent-notify: unknown option: %s\n' "$1" >&2
+      shift
+      ;;
+  esac
+done
+
+# Build a default title from tool + event when not supplied
+if [ -z "$title" ]; then
+  if [ -n "$tool" ] && [ -n "$event" ]; then
+    title="${tool}: ${event}"
+  elif [ -n "$tool" ]; then
+    title="$tool"
+  else
+    title="Agent Notification"
+  fi
+fi
+
+# Provide a fallback message so backends always have something to display
+if [ -z "$message" ]; then
+  message="Notification from ${tool:-agent} (${event:-unknown})"
+fi
+
+# ---------------------------------------------------------------------------
+# Backend dispatch
+# ---------------------------------------------------------------------------
+backends="${AGENT_NOTIFY_BACKENDS:-sound}"
+
+overall_exit=0
+
+# Split backends on commas and run each one.
+# We intentionally do NOT use set -e here so that a failing backend does not
+# prevent subsequent backends from running.
+IFS=','
+for backend in $backends; do
+  # Strip any surrounding whitespace
+  backend="$(printf '%s' "$backend" | tr -d ' \t')"
+  [ -z "$backend" ] && continue
+
+  backend_script="$BACKENDS_DIR/${backend}.sh"
+
+  if [ ! -f "$backend_script" ]; then
+    printf 'agent-notify: backend script not found: %s\n' "$backend_script" >&2
+    overall_exit=1
+    continue
+  fi
+
+  if ! sh "$backend_script" \
+       --tool    "$tool"    \
+       --event   "$event"   \
+       --message "$message" \
+       --title   "$title"; then
+    printf 'agent-notify: backend "%s" exited with an error\n' "$backend" >&2
+    overall_exit=1
+  fi
+done
+
+exit "$overall_exit"

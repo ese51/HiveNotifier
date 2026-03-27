@@ -1,0 +1,38 @@
+{
+  "_comment": "Claude Code hook configuration for agent-notify. Replace /path/to/agent-notify with the actual path to your agent-notify repo.",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/path/to/agent-notify/adapters/claude.sh\" stop"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/path/to/agent-notify/adapters/claude.sh\" notification"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/path/to/agent-notify/adapters/claude.sh\" permission_request"
+          }
+        ]
+      }
+    ]
+  }
+}

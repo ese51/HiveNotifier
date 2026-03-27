@@ -1,0 +1,14 @@
+# Codex CLI configuration example for agent-notify
+#
+# Add this to ~/.codex/config.toml (or run install/install-codex.sh).
+# Replace /path/to/agent-notify with the actual path to your agent-notify repo.
+#
+# Reference: https://github.com/openai/codex
+#
+# NOTE: Verify the notify format against the current Codex documentation.
+# The exact configuration key may differ across Codex CLI versions.
+
+[notify]
+# Run this command when a Codex task completes.
+# agent-notify will play a sound and optionally send a push notification.
+command = "/path/to/agent-notify/adapters/codex.sh"
