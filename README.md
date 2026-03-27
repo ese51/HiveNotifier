@@ -146,7 +146,7 @@ Each hook calls `adapters/claude.sh` with the hook type as an argument. The adap
 ./install/install-codex.sh
 ```
 
-This appends a `[notify]` section to `~/.codex/config.toml` if one is not already present.
+Adds a `notify` entry to `~/.codex/config.toml` using the correct array-of-strings format.
 
 ### Manual
 
@@ -158,7 +158,13 @@ Run the installer with `--project` to print the config block:
 
 Or copy `examples/codex-config.toml` and replace `/path/to/agent-notify` with the absolute path to your repo.
 
-**Note:** Verify the Codex notify configuration format against the [current Codex documentation](https://github.com/openai/codex) for your version. The `[notify]` key format may differ across releases.
+Codex expects `notify` to be defined as an array of strings, not a TOML table. For example:
+
+```toml
+notify = ["/absolute/path/to/HiveNotifier/adapters/codex.sh"]
+```
+
+**Note:** Verify the Codex notify configuration format against the [current Codex documentation](https://github.com/openai/codex) for your version.
 
 ---
 
