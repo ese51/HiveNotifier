@@ -65,18 +65,3 @@ Built for real workflows. Not demos.
 ```
 
 ---
-
-## My push to you
-
-Don’t treat this like a side project.
-
-This is:
-- directly useful
-- tied to your Hive ecosystem
-- something other builders actually need
-
----
-
-If you want, next I’ll help you:
-👉 turn this into a **one-command install (curl | bash)** so people actually use it
-```
