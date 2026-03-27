@@ -1,8 +1,11 @@
 # agent-notify
 
-A cross-tool notification layer for terminal AI coding agents.
+Stop babysitting your AI agents. Get notified when they finish or need you.
 
-Get a sound on your machine or a push notification on your phone the moment an agent finishes a task, needs your attention, or requests permission -- without polling a terminal window.
+Get sound, iPhone, and Apple Watch alerts when Claude Code or Codex:
+- finishes a task
+- needs your input
+- sends a notification
 
 ---
 
