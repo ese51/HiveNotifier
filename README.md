@@ -1,4 +1,6 @@
-# agent-notify
+# HiveNotifier
+
+A cross-tool notification layer for AI agents.
 
 Stop babysitting your AI agents. Get notified when they finish or need you.
 
@@ -11,7 +13,7 @@ Get sound, iPhone, and Apple Watch alerts when Claude Code or Codex:
 
 ## Why
 
-Terminal agents like Claude Code and Codex can run for minutes at a time. You step away, lose focus, and miss the moment they stop or ask a question. agent-notify fires a local sound or phone notification as soon as something needs you. It works out of the box with no account required for sound notifications, and supports Pushover for push delivery to your phone or Apple Watch.
+Terminal agents like Claude Code and Codex can run for minutes at a time. You step away, lose focus, and miss the moment they stop or ask a question. HiveNotifier fires a local sound or phone notification as soon as something needs you. It works out of the box with no account required for sound notifications, and supports Pushover for push delivery to your phone or Apple Watch.
 
 ---
 
@@ -162,7 +164,7 @@ Or copy `examples/codex-config.toml` and replace `/path/to/agent-notify` with th
 
 1. Create a free account at [pushover.net](https://pushover.net).
 2. Note your **user key** from the dashboard.
-3. Create a new application at [pushover.net/apps/build](https://pushover.net/apps/build). Name it `agent-notify` or anything you like. Copy the **API token**.
+3. Create a new application at [pushover.net/apps/build](https://pushover.net/apps/build). Name it `HiveNotifier` or anything you like. Copy the **API token**.
 4. Add both values to your `.env`:
 
 ```sh
@@ -190,9 +192,9 @@ bin/agent-notify          Main dispatcher. Reads AGENT_NOTIFY_BACKENDS,
 
 adapters/
   claude.sh               Translates Claude hook stdin JSON into a normalized
-                          agent-notify call.
+                          HiveNotifier call.
   codex.sh                Translates Codex task completion payload into a
-                          normalized agent-notify call.
+                          normalized HiveNotifier call.
 
 backends/
   sound.sh                Plays a local sound. Chooses a sound from the
@@ -281,7 +283,7 @@ The installer quotes adapter paths automatically. If you configure hooks manuall
 - Never commit your `.env` file. It is gitignored.
 - The Pushover API token and user key are passed as POST body fields over HTTPS by `curl`. They do not appear in process arguments or logs.
 - Hook scripts are run with your user permissions. Do not point Claude hooks at untrusted scripts.
-- If you install agent-notify for multiple users, each user should have their own `.env` with their own Pushover credentials.
+- If you install HiveNotifier for multiple users, each user should have their own `.env` with their own Pushover credentials.
 
 ---
 
