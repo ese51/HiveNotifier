@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "zsh -lc './adapters/codex.sh stop'"
+            "command": "zsh -lc '\"$(git rev-parse --show-toplevel)/adapters/codex.sh\" stop'"
           }
         ]
       }

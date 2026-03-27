@@ -4,7 +4,7 @@ A cross-tool notification layer for AI agents.
 
 Stop babysitting your AI agents. Get notified when they finish or need you.
 
-Get sound, iPhone, and Apple Watch alerts when Claude Code or Codex:
+Get sound, iPhone, and Apple Watch alerts when Claude Code, Codex, or your own agents:
 - finishes a task
 - needs your input
 - sends a notification
@@ -13,7 +13,7 @@ Get sound, iPhone, and Apple Watch alerts when Claude Code or Codex:
 
 ## Why
 
-Terminal agents like Claude Code and Codex can run for minutes at a time. You step away, lose focus, and miss the moment they stop or ask a question. HiveNotifier fires a local sound or phone notification as soon as something needs you. It works out of the box with no account required for sound notifications, and supports Pushover for push delivery to your phone or Apple Watch.
+Terminal agents like Claude Code and Codex can run for minutes at a time. You step away, lose focus, and miss the moment they stop or ask a question. HiveNotifier fires a local sound or phone notification as soon as something needs you, and it is also easy to call from custom agents, scripts, and workflow orchestrators. It works out of the box with no account required for sound notifications and supports Pushover for push delivery to your phone or Apple Watch.
 
 ---
 
@@ -23,6 +23,8 @@ Terminal agents like Claude Code and Codex can run for minutes at a time. You st
 |------|--------|
 | Claude Code | Stop, Notification, PermissionRequest |
 | Codex | Task complete |
+
+HiveNotifier works with Claude Code and Codex out of the box, and can also be called directly by custom agents, scripts, and workflow orchestrators that emit normalized events.
 
 ---
 
@@ -82,8 +84,8 @@ cp .env.example .env
 
 For the built-in `sound` backend, event routing works like this:
 
-- Finish sound: `stop`, `complete`
-- Attention sound: `notification`, `permission_request`
+- Finish sound: `stop`, `complete`, `success`
+- Attention sound: `notification`, `permission_request`, `needs_input`, `warning`, `error`
 - Unknown events: fall back to the attention sound
 
 Example custom sound configuration on macOS:
@@ -95,8 +97,8 @@ AGENT_NOTIFY_SOUND_ATTENTION=/System/Library/Sounds/Hero.aiff
 
 For the `pushover` backend, ttl is applied by normalized event:
 
-- Finish ttl: `stop`, `complete` -> default `120` seconds
-- Attention ttl: `notification`, `permission_request` -> default `900` seconds
+- Finish ttl: `stop`, `complete`, `success` -> default `120` seconds
+- Attention ttl: `notification`, `permission_request`, `needs_input`, `warning`, `error` -> default `900` seconds
 - Unknown events fall back to the attention ttl
 - If `AGENT_NOTIFY_PUSH_TTL_FINISH` or `AGENT_NOTIFY_PUSH_TTL_ATTENTION` is set to a blank value in `.env`, that ttl is omitted entirely
 
@@ -184,6 +186,30 @@ AGENT_NOTIFY_PUSH_TTL_ATTENTION=900
 
 ---
 
+## Using HiveNotifier with custom agents
+
+Any tool that can run a shell command can call `bin/agent-notify` directly with a normalized `--tool`, `--event`, `--title`, and `--message`.
+
+Examples:
+
+```sh
+# jarvis complete
+./bin/agent-notify --tool jarvis --event complete --title "Jarvis" --message "Task finished"
+
+# jarvis needs_input
+./bin/agent-notify --tool jarvis --event needs_input --title "Jarvis" --message "Need your input to continue"
+
+# signal complete
+./bin/agent-notify --tool signal --event success --title "Signal" --message "Workflow completed successfully"
+
+# generic script error
+./bin/agent-notify --tool script --event error --title "Build Script" --message "Deployment failed"
+```
+
+These generic events map into the same finish-like and attention-like behavior used by the built-in Claude Code and Codex adapters.
+
+---
+
 ## Architecture
 
 ```
@@ -218,7 +244,7 @@ Every adapter translates its tool-specific input into the same four fields befor
 | Field | Description |
 |-------|-------------|
 | `--tool` | Source tool (`claude`, `codex`) |
-| `--event` | Event type (`stop`, `notification`, `permission_request`, `complete`) |
+| `--event` | Event type (`stop`, `complete`, `success`, `notification`, `permission_request`, `needs_input`, `warning`, `error`) |
 | `--title` | Short notification title |
 | `--message` | Notification body |
 

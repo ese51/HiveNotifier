@@ -79,14 +79,14 @@ pushover_priority="${PUSHOVER_PRIORITY:-0}"
 
 ttl_for_event() {
   case "$1" in
-    stop|complete)
+    stop|complete|success)
       if [ "${AGENT_NOTIFY_PUSH_TTL_FINISH+x}" = "x" ]; then
         printf '%s' "${AGENT_NOTIFY_PUSH_TTL_FINISH}"
       else
         printf '120'
       fi
       ;;
-    notification|permission_request)
+    notification|permission_request|needs_input|warning|error)
       if [ "${AGENT_NOTIFY_PUSH_TTL_ATTENTION+x}" = "x" ]; then
         printf '%s' "${AGENT_NOTIFY_PUSH_TTL_ATTENTION}"
       else

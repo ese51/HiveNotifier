@@ -45,10 +45,10 @@ attention_sound="${AGENT_NOTIFY_SOUND_ATTENTION:-/System/Library/Sounds/Funk.aif
 
 sound_for_event() {
   case "$event" in
-    stop|complete)
+    stop|complete|success)
       printf '%s' "$finish_sound"
       ;;
-    notification|permission_request)
+    notification|permission_request|needs_input|warning|error)
       printf '%s' "$attention_sound"
       ;;
     *)
