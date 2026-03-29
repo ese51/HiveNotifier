@@ -114,6 +114,23 @@ if agent_notify_quiet_mode_check; then
   exit 0
 fi
 
+# If focus just transitioned OFF, dispatch the suppression summary first.
+# This fires before the current notification so the summary arrives first.
+if [ "${_QM_SEND_SUMMARY:-0}" = "1" ] && [ -n "${_QM_SUMMARY_MSG:-}" ]; then
+  IFS=','
+  for _qm_be in ${AGENT_NOTIFY_BACKENDS:-sound}; do
+    _qm_be="$(printf '%s' "$_qm_be" | tr -d ' \t')"
+    [ -z "$_qm_be" ] && continue
+    _qm_bes="$BACKENDS_DIR/${_qm_be}.sh"
+    [ -f "$_qm_bes" ] || continue
+    sh "$_qm_bes" \
+      --tool    "hivenotifier" \
+      --event   "notification" \
+      --message "$_QM_SUMMARY_MSG" \
+      --title   "Focus session ended"
+  done
+fi
+
 # ---------------------------------------------------------------------------
 # Backend dispatch
 # ---------------------------------------------------------------------------
