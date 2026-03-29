@@ -100,6 +100,21 @@ if [ -z "$message" ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Quiet mode check (HiveMind integration)
+# ---------------------------------------------------------------------------
+# Ask HiveMind whether quiet mode is active before touching any backend.
+# If enabled, suppress the notification and exit cleanly.
+# If HiveMind is unreachable, proceed normally (fail-open).
+# shellcheck source=../lib/quiet_mode.sh
+. "$REPO_ROOT/lib/quiet_mode.sh"
+
+if agent_notify_quiet_mode_check; then
+  printf 'agent-notify: suppressed (quiet mode enabled) — tool=%s event=%s title=%s\n' \
+    "$tool" "$event" "$title" >&2
+  exit 0
+fi
+
+# ---------------------------------------------------------------------------
 # Backend dispatch
 # ---------------------------------------------------------------------------
 backends="${AGENT_NOTIFY_BACKENDS:-sound}"
